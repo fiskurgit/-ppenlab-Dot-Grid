@@ -1,2 +1,2 @@
-# -ppenlab-Dot-Grid
+# Dot Grid (från Öppenlab)
 Dot plugin for Figma
