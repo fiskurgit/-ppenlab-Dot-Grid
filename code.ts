@@ -2,11 +2,16 @@
 
 let dotSize = 1;
 let distance = 12;
+let override = false;
 figma.ui.onmessage = async(params) => {
   console.log("dot grid params: ", params);
-  var values = params.split(":");
-  dotSize = values[0];
-  distance = values[1];
+  var values = params.split(":") as Array<string>;
+  dotSize = Number(values[0]);
+  distance = Number(values[1]);
+  console.log("Values size: " + values.length);
+  if(values.length > 2) {
+    override = true;
+  }
   build();
 }
 figma.showUI(__html__, {
@@ -29,8 +34,6 @@ function build(){
     const width = node.width;
     const height = node.height;
     
-    let svg = "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"" + width + "\" height=\"" + height + "\" version=\"1.1\">\n";
-    
     console.log("Distance: " + distance);
     console.log("Dot size: " + dotSize);
     console.log("Width: " + width + " Height: " + height);
@@ -38,32 +41,34 @@ function build(){
     const size = Math.floor(dotSize);
 
     const count = numberOfDots(width, height, inc, size);
-    console.log("Total grid dots: " + count);
-    if(count > 1600){
-        showAlert("This will take too long, try increasing the distance, or reduce the rectangle size");
+    console.log("Total grid dots: " + count + " override: " + override);
+    if(override == false && count > 4000){
+        figma.ui.postMessage(count);
         return;
     }
+
+    override = false;
+
+    const gridParent = figma.createFrame();
+    gridParent.x = node.x;
+    gridParent.y = node.y;
+    gridParent.resize(node.width, node.height);
    
     for(var y = size; y < height; y += inc){
       for(var x = size; x < width; x += inc){
-        svg += "<circle cx=\"" + x + "\" cy=\"" + y + "\" r=\"" + size + "\" stroke=\"none\" fill=\"black\" />"
+        const ellipse = figma.createEllipse();
+        ellipse.x = x;
+        ellipse.y = y;
+        ellipse.resize(size, size);
+        gridParent.appendChild(ellipse);
       }
     }
-    
-    svg += "\n</svg>"
-    
-    const frameNode = figma.createNodeFromSvg(svg);
-    frameNode.x = xStart;
-    frameNode.y = yStart;
-    
-    let group = figma.group(frameNode.children, figma.currentPage);
+
+    let group = figma.group(gridParent.children, figma.currentPage);
     let flat = figma.flatten(group.children, figma.currentPage);
     flat.fills = node.fills;
     node.visible = false;
-
-    frameNode.remove();
-
-    console.log("Node parent type: " + node.parent.type);
+    gridParent.remove();
     const index = node.parent.children.findIndex(_node => _node.id == node.id);
     node.parent.insertChild(index+1, flat);
     figma.closePlugin();

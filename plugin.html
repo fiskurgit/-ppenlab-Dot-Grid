@@ -77,8 +77,17 @@
             }
 
             onmessage = (event) => {
-                console.log("alert message from plugin: ", event.data.pluginMessage)
-                alert(event.data.pluginMessage);
+                console.log("alert message from plugin: ", event.data.pluginMessage);
+
+                const message = event.data.pluginMessage;
+                if(isNaN(message)){
+                    alert(message);
+                }else{
+                    const proceed = confirm("Generating a grid of " + Math.floor(message) + " may take a while, are you sure you want to continue?");
+                    if(proceed){
+                        parent.postMessage({ pluginMessage: "" + dotSizeSlider.value + ":" + distanceSlider.value + ":overidecheck" }, '*')
+                    }
+                }
             }
         </script>
     </body>
