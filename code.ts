@@ -14,9 +14,16 @@ figma.showUI(__html__, {
   height: 140
 });
 
+function numberOfDots(width: number, height: number, distance: number, dotSize: number): Number{
+  const numberHorizontal = width/distance;
+  const numberVertical = height/distance;
+  return numberHorizontal * numberVertical;
+}
+
 function build(){
   const node = figma.currentPage.selection[0];
-  if(node.type === "RECTANGLE"){
+  
+  if(node && node.type == "RECTANGLE"){
     const xStart = node.x;
     const yStart = node.y;
     const width = node.width;
@@ -29,6 +36,14 @@ function build(){
     console.log("Width: " + width + " Height: " + height);
     const inc = Math.floor(distance);
     const size = Math.floor(dotSize);
+
+    const count = numberOfDots(width, height, inc, size);
+    console.log("Total grid dots: " + count);
+    if(count > 1600){
+        showAlert("This will take too long, try increasing the distance, or reduce the rectangle size");
+        return;
+    }
+   
     for(var y = size; y < height; y += inc){
       for(var x = size; x < width; x += inc){
         svg += "<circle cx=\"" + x + "\" cy=\"" + y + "\" r=\"" + size + "\" stroke=\"none\" fill=\"black\" />"
@@ -45,12 +60,19 @@ function build(){
     let flat = figma.flatten(group.children, figma.currentPage);
     flat.fills = node.fills;
     node.visible = false;
+
     frameNode.remove();
-    figma.currentPage.appendChild(flat);
+
+    console.log("Node parent type: " + node.parent.type);
+    const index = node.parent.children.findIndex(_node => _node.id == node.id);
+    node.parent.insertChild(index+1, flat);
     figma.closePlugin();
   }else{
-    console.log("Selection must be a rectangle");
-    //todo - show error
+    showAlert("Select a rectangle to generate a dot grid");
+  }
+
+  function showAlert(message: String){
+    figma.ui.postMessage(message)
   }
 }
 

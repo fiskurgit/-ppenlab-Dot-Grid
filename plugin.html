@@ -75,6 +75,11 @@
             function generate(){
                 parent.postMessage({ pluginMessage: "" + dotSizeSlider.value + ":" + distanceSlider.value }, '*')
             }
+
+            onmessage = (event) => {
+                console.log("alert message from plugin: ", event.data.pluginMessage)
+                alert(event.data.pluginMessage);
+            }
         </script>
     </body>
 </html>
