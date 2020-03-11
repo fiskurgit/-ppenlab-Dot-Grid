@@ -9,6 +9,8 @@ Currently you'll need to set up [Figma for plugin development](https://www.figma
 
 ## Usage
 
+![A grid of dots](screenshots/screenshot2.png)
+
 Converts any rectangle shape into a grid of dots:
 
 * Select a rectangle
