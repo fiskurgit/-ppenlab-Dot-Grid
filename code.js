@@ -10,17 +10,11 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 let dotSize = 1;
 let distance = 12;
-let override = false;
 figma.ui.onmessage = (params) => __awaiter(this, void 0, void 0, function* () {
-    console.log("dot grid params: ", params);
     var values = params.split(":");
     dotSize = Number(values[0]);
     distance = Number(values[1]);
-    console.log("Values size: " + values.length);
-    if (values.length > 2) {
-        override = true;
-    }
-    build();
+    build((values.length > 2));
 });
 figma.showUI(__html__, {
     width: 270,
@@ -31,7 +25,7 @@ function numberOfDots(width, height, distance, dotSize) {
     const numberVertical = height / distance;
     return numberHorizontal * numberVertical;
 }
-function build() {
+function build(overrideWarning) {
     const node = figma.currentPage.selection[0];
     if (node && node.type == "RECTANGLE") {
         const xStart = node.x;
@@ -44,12 +38,11 @@ function build() {
         const inc = Math.floor(distance);
         const size = Math.floor(dotSize);
         const count = numberOfDots(width, height, inc, size);
-        console.log("Total grid dots: " + count + " override: " + override);
-        if (override == false && count > 4000) {
+        console.log("Total grid dots: " + count + " override: " + overrideWarning);
+        if (overrideWarning == false && count > 4000) {
             figma.ui.postMessage(count);
             return;
         }
-        override = false;
         const gridParent = figma.createFrame();
         gridParent.x = node.x;
         gridParent.y = node.y;

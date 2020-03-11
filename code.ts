@@ -1,19 +1,21 @@
-//https://www.figma.com/plugin-docs/intro/
+/**
+ *  
+ * Öppenlab dot grid
+ * https://oppenlab.net/
+ * 
+ * See: https://www.figma.com/plugin-docs/intro/
+ */
 
 let dotSize = 1;
 let distance = 12;
-let override = false;
+
 figma.ui.onmessage = async(params) => {
-  console.log("dot grid params: ", params);
   var values = params.split(":") as Array<string>;
   dotSize = Number(values[0]);
   distance = Number(values[1]);
-  console.log("Values size: " + values.length);
-  if(values.length > 2) {
-    override = true;
-  }
-  build();
+  build((values.length > 2));//Nasty, just replace message string with a class
 }
+
 figma.showUI(__html__, {
   width: 270,
   height: 140
@@ -25,7 +27,7 @@ function numberOfDots(width: number, height: number, distance: number, dotSize: 
   return numberHorizontal * numberVertical;
 }
 
-function build(){
+function build(overrideWarning: boolean){
   const node = figma.currentPage.selection[0];
   
   if(node && node.type == "RECTANGLE"){
@@ -41,13 +43,12 @@ function build(){
     const size = Math.floor(dotSize);
 
     const count = numberOfDots(width, height, inc, size);
-    console.log("Total grid dots: " + count + " override: " + override);
-    if(override == false && count > 4000){
+    console.log("Total grid dots: " + count + " override: " + overrideWarning);
+    if(overrideWarning == false && count > 4000){
         figma.ui.postMessage(count);
         return;
     }
 
-    override = false;
 
     const gridParent = figma.createFrame();
     gridParent.x = node.x;
